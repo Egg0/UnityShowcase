@@ -1,5 +1,7 @@
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -14,9 +16,33 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.javascript.host.dom.NodeList;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 
-public class SiteParser {
+/**
+ * 
+ * @author Marcus
+ * SiteParser searches unity3d for games and populates a list of GameInfo with the data.
+ *
+ */
 
+public class SiteParser {
+	private List<GameInfo> allGames;
+	
 	public static void main(String[] args) throws Exception {
+		SiteParser sp = new SiteParser();
+		sp.parse();
+		sp.printGames();
+	}
+	
+	public SiteParser() {
+		allGames = new ArrayList<GameInfo>();
+	}
+	
+	/**
+	 * Parses the unity showcase and populates allGames with data.
+	 * @throws Exception
+	 * @modifies this.allGames
+	 * @effects this.allGames now contains a list of games from the unity showcase
+	 */
+	public void parse() throws Exception {
 		String url = "https://unity3d.com/showcase/gallery";
 		WebClient wc = new WebClient(BrowserVersion.FIREFOX_45);
 		HtmlPage page = wc.getPage(url);
@@ -43,7 +69,7 @@ public class SiteParser {
 		// Get description	
 		DomNodeList<DomNode> descriptions = page.querySelectorAll(".mb15.description.clear p");
 		
-		// Get platforms TODO: iterate over games and store int array of platforms per game
+		// Get platforms, and store number of each in the platformsPerGame list
 		DomNodeList<DomNode> platforms = page.querySelectorAll(".platform-icon.pa0.m0a.mr1.mb0.tooltip .logo");
 		List<Integer> platformsPerGame = new ArrayList<Integer>();
 		final List<HtmlDivision> nodes = page.getByXPath("//div[contains(@class,'platform-small')]");
@@ -52,27 +78,47 @@ public class SiteParser {
 			platformsPerGame.add(children.size());   
 		}
 		
-		//Printing the titles with their images for debugging
+		// For each one, populate a GameInfo with the data, then print, storing all in a list		
 		int totalDistance = 0;
 		for (int i = 0; i < titles.size(); i++) {
-			System.out.print(titles.get(i).getTextContent() + ": ");
-			System.out.println(images.get(i));
-			System.out.println(" Game site: " + ((DomElement) sites.get(i)).getAttribute("href"));
-			System.out.println(" Developer: " + developers.get(i).getTextContent() + ": " 
-								+ ((DomElement) developers.get(i)).getAttribute("href"));
-			System.out.println(" Genre: " + genres.get(i).getTextContent());
-			System.out.println(" Description: " + descriptions.get(i).getTextContent());
-			System.out.print(" Platforms: ");
+			String title = titles.get(i).getTextContent();
+			String image = ((DomElement) images.get(i)).getAttribute("src");
+			String gameSite = ((DomElement) sites.get(i)).getAttribute("href");
+			String developer = developers.get(i).getTextContent();
+			String devSite = ((DomElement) developers.get(i)).getAttribute("href");
+			String genre = genres.get(i).getTextContent();
+			String description = descriptions.get(i).getTextContent();
+			String platformString = "";
 			for (int j = 0; j < platformsPerGame.get(i); j++) {
-				System.out.print(platforms.get(j + totalDistance) + " ");
+				platformString += (((DomElement) platforms.get(j + totalDistance)).getAttribute("class") + " ");
 			}
+			
+			GameInfo game = new GameInfo(title, image, gameSite, developer, 
+										devSite, genre, description, platformString);
+			allGames.add(game);
 			totalDistance += platformsPerGame.get(i);
-			System.out.println("\n");
-
 		} 
-
-		//System.out.println(page.asXml());
-		
-		
+	}
+	
+	/**
+	 * Prints out all the games in allGames
+	 */
+	public void printGames() {
+		// Printing the list of games
+		for (int i = 0; i < allGames.size(); i++) {
+			System.out.println(allGames.get(i).toString());
+		}
+	}
+	
+	/**
+	 * Gets an unmodifiable list of all the GameInfos that this parsed.
+	 * @return an unmodifiable list of the games associated with this
+	 * @return null if allGames is empty, i.e. parse hasn't been called yet
+	 */
+	public List<GameInfo> getGames() {
+		if (allGames.isEmpty()) {
+			return null;
+		}
+		return Collections.unmodifiableList(allGames);
 	}
 }
