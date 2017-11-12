@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.gargoylesoftware.htmlunit.html.DomElement;
@@ -48,6 +49,31 @@ public final class GameInfo {
 				this.platforms.add(platList[i]);
 			}
 		}
+	}
+	
+	public String getTitle() {
+		return title;
+	}
+	public String getImage() {
+		return image;
+	}
+	public String getGameSite() {
+		return gameSite;
+	}
+	public String getDeveloper() {
+		return developer;
+	}
+	public String getDevSite() {
+		return devSite;
+	}
+	public String getGenre() {
+		return genre;
+	}
+	public String getDescription() {
+		return description;
+	}
+	public List<String> getPlatforms() {
+		return Collections.unmodifiableList(platforms);
 	}
 	
 	public String toString() {
