@@ -28,6 +28,9 @@ public class SiteParser {
 		// Get all images
 		DomNodeList<DomNode> images = page.querySelectorAll(".ic");
 		
+		// Get all developer sites
+		DomNodeList<DomNode> sites = page.querySelectorAll(".images a");
+		
 		// Get all titles
 		DomNodeList<DomNode> titles = page.querySelectorAll(".wrap h3");
 		
@@ -49,13 +52,14 @@ public class SiteParser {
 			platformsPerGame.add(children.size());   
 		}
 		
-		
 		//Printing the titles with their images for debugging
 		int totalDistance = 0;
 		for (int i = 0; i < titles.size(); i++) {
 			System.out.print(titles.get(i).getTextContent() + ": ");
 			System.out.println(images.get(i));
-			System.out.println(" Developer: " + developers.get(i).getTextContent());
+			System.out.println(" Game site: " + ((DomElement) sites.get(i)).getAttribute("href"));
+			System.out.println(" Developer: " + developers.get(i).getTextContent() + ": " 
+								+ ((DomElement) developers.get(i)).getAttribute("href"));
 			System.out.println(" Genre: " + genres.get(i).getTextContent());
 			System.out.println(" Description: " + descriptions.get(i).getTextContent());
 			System.out.print(" Platforms: ");
@@ -64,6 +68,7 @@ public class SiteParser {
 			}
 			totalDistance += platformsPerGame.get(i);
 			System.out.println("\n");
+
 		} 
 
 		//System.out.println(page.asXml());
